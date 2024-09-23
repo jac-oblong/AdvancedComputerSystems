@@ -1,0 +1,36 @@
+#+title: Cache Performance Profiling
+
+* Introduction
+
+The objective of this project is to gain deeper understanding of cache and memory hierarchy
+in modern computers.
+
+** Hardware Description
+
+| *Computer* | Lenovo IdeaPad Flex 5 14ITL05 |
+| *CPU*      | 11th Gen Intel Core i5-1135G7 |
+| *Clock*    | 2.40GHz                       |
+| *Cores*    | 4                             |
+| *Threads*  | 8                             |
+| *L1d*      | 192 KiB                       |
+| *L1i*      | 128 KiB                       |
+| *L2*       | 5 MiB                         |
+| *L3*       | 8 MiB                         |
+| *RAM*      | 12 GB                         |
+
+* Experiments
+
+** [[./part1][Part 1]]: Memory Latency with 0 Queue Length
+
+This experiment uses Intel's Memory Latency Checker (mlc) to determine the read/write latency
+of cache and main memory when the queue length is 0.
+
+** [[./part2][Part 2]]: Max Main Memory Bandwidth
+
+This experiment uses mlc to determine the maximum bandwidth of main memory under different
+data access granularity and different read/write intensity ratios.
+
+** [[./part3][Part 3]]: Latency and Throughput Tradeoff
+
+This experiment uses mlc to measure the tradeoff between read/write latency and throughput to
+demonstrate what queuing theory predicts.

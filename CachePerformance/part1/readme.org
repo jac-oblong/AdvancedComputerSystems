@@ -1,0 +1,8 @@
+#+title: Latency when Queue Length is 0
+
+Using mlc's ~--idle_latency~ option, the latency of the system with a queue length of 0 can be
+measured. The ~-b~ option allows specifying the buffer size.
+
+#+begin_src bash
+sudo ./run.py
+#+end_src

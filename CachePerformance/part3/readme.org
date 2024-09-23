@@ -1,0 +1,11 @@
+#+title: Latency and Throughput Tradeoff.
+
+mlc's ~--loaded_latency~ option is used for this part. Since main memory is targeted, the buffer size
+(specified by ~-b~) will be left at the default (100 MiB).
+
+The ~-r~ option can be used to require random access reads. The ~-e~ option can be used to ensure
+that the prefetcher settings are not changed.
+
+#+begin_src bash
+sudo ./run.py
+#+end_src

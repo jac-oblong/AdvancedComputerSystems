@@ -1,0 +1,10 @@
+#+title: Maximum Main Memory Bandwidth
+
+mlc's ~--max_bandwidth~ option is used for this part. Since main memory is targeted, the buffer size
+(specified by ~-b~) will be left at the default (100 MiB).
+
+The ~-l~ option can be used to control the granularity. 64B, 256B, and 1024B granularity was used.
+
+#+begin_src bash
+sudo ./run.py
+#+end_src

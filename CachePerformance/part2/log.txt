@@ -1,0 +1,15 @@
+64, ALL Reads        , 	23211.32
+64, 3:1 Reads-Writes , 	16456.99
+64, 2:1 Reads-Writes , 	15388.94
+64, 1:1 Reads-Writes , 	14578.69
+64, Stream-triad like, 	16780.42
+256, ALL Reads        , 	12677.32
+256, 3:1 Reads-Writes , 	14572.83
+256, 2:1 Reads-Writes , 	14363.43
+256, 1:1 Reads-Writes , 	15810.75
+256, Stream-triad like, 	12074.79
+1024, ALL Reads        , 	9010.73
+1024, 3:1 Reads-Writes , 	10895.49
+1024, 2:1 Reads-Writes , 	10006.23
+1024, 1:1 Reads-Writes , 	12883.94
+1024, Stream-triad like, 	8954.73
