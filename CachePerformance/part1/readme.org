@@ -6,3 +6,21 @@ measured. The ~-b~ option allows specifying the buffer size.
 #+begin_src bash
 sudo ./run.py
 #+end_src
+
+The results of the experiment can be found in [[file:log.txt][the log]]. It can also be seen in the graph below.
+
+[[file:buffer_size_vs_latency.png]]
+
+The graph shows that when the buffer size is low (i.e. it is targeting cache) the latency is also
+low. As the buffer size passes ~25,000 KiB, the latency stabilizes because the buffer is now
+targeting RAM, so the latency will remain consistent.
+
+A zoomed in portion of the graph can be seen below. This excludes the larger buffer sizes, so that
+the results of targeting cache can be seen more easily.
+
+[[file:buffer_size_vs_latency_zoomed.png]]
+
+Here, the differences between the different cache levels is more obvious. There are three
+horizontal sections: one below 200 KiB, one between 200 KiB and 750 KiB, and one above 750
+KiB. These correspond to L1, L2, and L3 cache, respectively. Between the horizontal sections
+there are steep increases in latency caused by the movement from one cache level to the next.
