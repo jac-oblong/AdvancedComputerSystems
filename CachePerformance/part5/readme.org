@@ -10,5 +10,5 @@ within a page.
 #+begin_src bash
 gcc vector.c -o vector
 
-perf -e cycles,instructions,page-faults,dTLB-loads,dTLB-load-misses -- ./vector --pages <N> <--miss>
+perf stat -e cycles,instructions,page-faults,dTLB-loads,dTLB-load-misses -- ./vector --pages <N> <--miss>
 #+end_src

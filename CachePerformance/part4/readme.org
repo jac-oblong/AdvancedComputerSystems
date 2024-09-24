@@ -9,5 +9,47 @@ cache misses. The second way is iterating in a random order, which should cause 
 #+begin_src bash
 gcc matrix.c -o matrix
 
-perf -e cycles,instructions,cache-references,cache-misses,L1-dcache-loads,L1-dcache-load-misses -- ./matrix --size <N> <--miss>
+perf stat -e cycles,instructions,cache-references,cache-misses,L1-dcache-loads,L1-dcache-load-misses -- ./matrix --size <N> <--miss>
 #+end_src
+
+The data for the experiment can be seen below.
+
+*Hit Matrix Multiplication Data*
+
+| Matrix Size | Execution Time (s) | Cache Miss Rate |
+|-------------+--------------------+-----------------|
+|         100 |        0.002082438 |          72.30% |
+|         500 |        0.014615659 |          28.37% |
+|        1000 |        0.049368788 |          24.26% |
+|        2500 |        0.179118957 |          25.98% |
+|        5000 |        0.610344936 |          28.20% |
+|       10000 |        2.390581093 |          30.08% |
+|       25000 |        14.52557036 |          29.39% |
+|       50000 |        107.3768696 |          10.82% |
+
+*Miss Matrix Multiplication Data*
+
+| Matrix Size | Execution Time (s) | Cache Miss Rate |
+|-------------+--------------------+-----------------|
+|         100 |        0.002023781 |          70.18% |
+|         500 |        0.015304459 |          45.37% |
+|        1000 |        0.050777658 |          59.00% |
+|        2500 |        0.194836255 |          72.12% |
+|        5000 |        0.697614851 |          63.72% |
+|       10000 |        2.963377089 |          51.98% |
+|       25000 |        22.24608273 |          48.86% |
+|       50000 |        141.0969789 |          74.82% |
+
+
+[[file:matrix_size_and_execution_time.png]]
+
+[[file:matrix_size_vs_cache_miss_rate.png]]
+
+As can be seen in the data and the two graphs above, the operations targeting cache
+misses (in red) have worse performance than normal. The cache miss operations
+have at least 20% more cache misses for almost all matrix sizes.
+
+As is to be expected, the execution time increases as the matrix size increases. However,
+the miss operations increase at a faster rate. Additionally, the miss code take an
+average of 17% more time to execute than the hit code, starting at 4% more time and getting up
+to 50% more time for the larger matrix sizes.
