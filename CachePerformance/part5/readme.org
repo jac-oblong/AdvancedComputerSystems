@@ -12,3 +12,52 @@ gcc vector.c -o vector
 
 perf stat -e cycles,instructions,page-faults,dTLB-loads,dTLB-load-misses -- ./vector --pages <N> <--miss>
 #+end_src
+
+The data for the experiment can be seen below.
+
+*Hit Vector Multiplication Data*
+
+| Vector Size | Execution Time (s) | TLB Miss Rate |
+|-------------+--------------------+---------------|
+|        1000 |        0.024698331 |         0.00% |
+|        5000 |        0.098059285 |         0.00% |
+|       10000 |        0.186880974 |         0.00% |
+|       25000 |        0.459664391 |         0.00% |
+|       50000 |        0.930261112 |         0.00% |
+|      100000 |        1.842840602 |         0.00% |
+|      250000 |        4.600545431 |         0.00% |
+|      500000 |        9.173807994 |         0.00% |
+|     1000000 |        18.21992065 |         0.00% |
+
+*Miss Vector Multiplication Data*
+
+| Vector Size | Execution Time (s) | TLB Miss Rate |
+|-------------+--------------------+---------------|
+|        1000 |        0.021849629 |         0.00% |
+|        5000 |        0.140535016 |         2.97% |
+|       10000 |        0.287977005 |         3.02% |
+|       25000 |        0.709075742 |         3.09% |
+|       50000 |        1.399446117 |         3.10% |
+|      100000 |        2.701457129 |         3.11% |
+|      250000 |        6.431630874 |         3.12% |
+|      500000 |        12.56513747 |         3.12% |
+|     1000000 |        25.34720205 |         3.12% |
+
+
+[[file:vector_size_vs_execution_time.png]]
+
+[[file:vector_size_vs_tlb_miss_rate.png]]
+
+As can be seen in the data and the two graphs above, the operations targeting TLB
+misses (in red) have worse performance than normal. As expected, increasing the
+size of the vector also increases the execution time, but the operations targeting
+TLB misses increase in time at a faster rate. On average, operations targeting
+TLB misses have a 39% slower execution time.
+
+The TLB Miss Ratio is not as interesting. For operations that do not target TLB
+misses, the percentage of TLB loads that miss is 0.00%. This makes total sense
+because the vector operation is done page by page, and so the total number of
+TLB misses should be approximately equal to the total number of pages. Operations
+that do target TLB misses, however, have a TLB miss ratio of 3.00% because the
+operations are done across pages, so a specific page will not be accessed again
+until all other pages have been visited that round.
