@@ -8,3 +8,19 @@ The ~-l~ option can be used to control the granularity. 64B, 256B, and 1024B gra
 #+begin_src bash
 sudo ./run.py
 #+end_src
+
+The results of the experiment can be found in [[file:log.txt][the log]]. It can also be seen in the graph below.
+
+[[file:bandwidth_vs_granularity.png]]
+
+The above graph shows that accessing memory at a 64B is generally better, regardless of
+the read-write ratio. This is primarily because the memory controller will load data into
+cache that is spatially close to previously accessed data.
+
+[[file:bandwidth_vs_read_write_ratio.png]]
+
+The graph above shows the same data, but organized by granularity instead of by read-write
+ratio. As can be seen, more reads than writes will generally result in a higher memory
+bandwidth. This is primarily because the memory controller will prefetch memory that
+may be read in the near future, but there is no way to pre-write memory, so writes will
+eventually have to be synced with main memory.
