@@ -1,0 +1,14 @@
+#+title: TLB Miss Ratio
+
+In order to measure the effect of cache misses on the software speed performance, the same idea as
+the cache miss experiment will be used. In this experiment, however, the contents of a vector will
+be multiplied together, and different parts of the vector will be enforced to exist in different
+pages using ~mmap~. The total number of pages can be changed to increase the likelihood of TLB
+misses. In order to cause more misses, the multiplication will happen across pages instead of
+within a page.
+
+#+begin_src bash
+gcc vector.c -o vector
+
+perf -e cycles,instructions,page-faults,dTLB-loads,dTLB-load-misses -- ./vector --pages <N> <--miss>
+#+end_src

@@ -11,10 +11,10 @@ in modern computers.
 | *CPU*      | 11th Gen Intel Core i5-1135G7 |
 | *Clock*    | 2.40GHz                       |
 | *Cores*    | 4                             |
-| *Threads*  | 8                             |
-| *L1d*      | 192 KiB                       |
-| *L1i*      | 128 KiB                       |
-| *L2*       | 5 MiB                         |
+| *Threads*  | 8 (2 per Core)                |
+| *L1d*      | 192 KiB / Core                |
+| *L1i*      | 128 KiB / Core                |
+| *L2*       | 5 MiB / Core                  |
 | *L3*       | 8 MiB                         |
 | *RAM*      | 12 GB                         |
 
@@ -34,3 +34,13 @@ data access granularity and different read/write intensity ratios.
 
 This experiment uses mlc to measure the tradeoff between read/write latency and throughput to
 demonstrate what queuing theory predicts.
+
+** [[./part4][Part 4]]: Cache Miss Ratio
+
+This experiment uses perf to measure the impact of cache miss ratio to the software speed
+performance.
+
+** [[./part5][Part 5]]: TLB Miss Ratio
+
+This experiment uses perf to measure the impact of TLB miss ratio to the software speed
+performance.

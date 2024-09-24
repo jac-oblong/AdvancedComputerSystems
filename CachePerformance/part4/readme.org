@@ -1,0 +1,13 @@
+#+title: Cache Miss Ratio
+
+In order to measure the effect of cache misses on the software speed performance, the indexes of a
+~N~ length vector are multiplied. This is mathematically equivalent to calculating ~(N-1)!~. ~N~ is
+varied to achieve cache misses for the different cache levels. The multiplication is done in two
+different ways. The first way is iterating through the array sequentially, which should cause fewer
+cache misses. The second way is iterating in a random order, which should cause more cache misses.
+
+#+begin_src bash
+gcc matrix.c -o matrix
+
+perf -e cycles,instructions,cache-references,cache-misses,L1-dcache-loads,L1-dcache-load-misses -- ./matrix --size <N> <--miss>
+#+end_src
