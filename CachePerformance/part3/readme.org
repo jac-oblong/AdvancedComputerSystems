@@ -9,3 +9,22 @@ that the prefetcher settings are not changed.
 #+begin_src bash
 sudo ./run.py
 #+end_src
+
+The results of the experiment can be found in [[file:log.txt][the log]]. It can also be seen in the graph below.
+
+[[file:latency_vs_injected_delay.png]]
+
+The graph above shows the latency vs the injected delay. When there is little injected delay, the
+latency is high, and as the injected delay increases, the latency decreases until it hits a steady
+state. This is because as we inject more delay into the system, eventually we get to the point
+that the bandwidth is no longer limiting memory access. Instead the latency is caused purely
+by the inherent latency of the memory, which will not change.
+
+[[file:bandwidth_vs_injected_delay.png]]
+
+The graph above shows a similar effect for bandwidth. As more delays are injected, the system spends
+more time waiting on incoming memory, and so the bandwidth decreases.
+
+We also see that with very low injected delay, the bandwidth suffers slightly. Additionally, with
+the high bandwidth, the latency also increases. This is expected from queuing theory, because as we
+increase the arrival rate (inject less delays), the latency will also increase.
