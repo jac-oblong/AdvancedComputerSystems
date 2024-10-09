@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
     if (cli.sparcity1 != 0 && cli.sparcity2 == 0) {
       sc = sa * b;
     } else if (cli.sparcity1 == 0 && cli.sparcity2 != 0) {
-      sc = sb * a;
+      sc = a * sb;
     } else {
       sc = sa * sb;
     }

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <immintrin.h>
+#include <iostream>
 #include <ostream>
 #include <random>
 #include <stdexcept>
@@ -18,8 +19,12 @@ typedef void (*MatrixMultFunc)(DenseMatrix &, DenseMatrix &, DenseMatrix &,
 /*                                                                            */
 /******************************************************************************/
 
+#ifdef DEBUG
+static std::default_random_engine generator;
+#else
 static std::random_device r;
 static std::default_random_engine generator{r()};
+#endif
 
 float rand_f(void) {
   static std::uniform_real_distribution<float> fdistribution(0.0, 1000.0);
@@ -87,7 +92,7 @@ void MatrixMultRegion_SIMD_Cache(DenseMatrix &a, DenseMatrix &b, DenseMatrix &c,
     for (size_t j = 0; j < b.num_rows(); j++) {
       float sum = 0;
       for (size_t k = 0; k < a.num_cols(); k += 4) {
-        va = _mm_loadu_ps(&a.get(j, k));
+        va = _mm_loadu_ps(&a.get(i, k));
         vb = _mm_loadu_ps(&b.get(j, k));
 
         vc = _mm_mul_ps(va, vb);
@@ -207,11 +212,10 @@ DenseMatrix DenseMatrix::operator*(DenseMatrix &other) {
   return result;
 }
 
-DenseMatrix DenseMatrix::operator*(SparseMatrix &other) {
+SparseMatrix DenseMatrix::operator*(SparseMatrix &other) {
   // let sparse matrix handle multiplication
-  SparseMatrix result = other * (*this);
-  DenseMatrix actual = DenseMatrix(result);
-  return actual;
+  SparseMatrix this_sparse = SparseMatrix(*this);
+  return this_sparse * other;
 }
 
 float &DenseMatrix::get(size_t row, size_t col) {
@@ -230,7 +234,7 @@ void DenseMatrix::set(size_t row, size_t col, float val) {
 
 void DenseMatrix::transpose() {
   for (size_t i = 0; i < this->size; i++) {
-    for (size_t j = 0; j < this->size; j++) {
+    for (size_t j = 0; j < i; j++) {
       float temp = this->values[i][j];
       this->values[i][j] = this->values[j][i];
       this->values[j][i] = temp;

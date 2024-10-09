@@ -24,7 +24,7 @@ public:
   size_t num_cols() const;
 
   DenseMatrix operator*(DenseMatrix &other);
-  DenseMatrix operator*(SparseMatrix &other);
+  SparseMatrix operator*(SparseMatrix &other);
 
   float &get(size_t row, size_t col);
   void set(size_t row, size_t col, float val);
