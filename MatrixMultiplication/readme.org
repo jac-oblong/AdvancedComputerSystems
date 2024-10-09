@@ -1,7 +1,7 @@
 #+title: Matrix-Matrix Multiplication
 
 #+begin_src bash
-gcc matrixmult.c -o matrixmult -Wall -msse3 -O3
+g++ main.cpp matrixmult.cpp -o main -Wall -msse3 -O3
 
-./matrixmult [-t <n>] [-dcs] [-s1 <%>] [-s2 <%>] <size>
+./main [-t <n>] [-sc] [--sparse [-s1 <%>] [-s2 <%>]] <size>
 #+end_src
