@@ -1,7 +1,152 @@
 #+title: Matrix-Matrix Multiplication
 
+In order to measure the effect of different optimizations on matrix multiplication performance,
+multiple different test-benches were created using a combination of multi-threading, cache
+optimizations, simd, and sparse matrix compression.
+
 #+begin_src bash
 g++ main.cpp matrixmult.cpp -o main -Wall -msse3 -O3
 
-./main [-t <n>] [-sc] [--sparse [-s1 <%>] [-s2 <%>]] <size>
+./main [-t <n>] [-sc] [--sparse] [-s1 <%>] [-s2 <%>] <size>
+
+perf stat -- ./main <size>
 #+end_src
+
+* Default vs MultiThreading vs SIMD vs Cache vs All
+
+The following data was obtained by running tests using no optimizations, only multithreading,
+only simd, only cache optimizations, and all optimizations.
+
+The data in the table below was obtained by running ~perf stat -- ./main <size>~.
+
+| Matrix Size (N = M) | No Optimizations Time (ms) |
+|---------------------+----------------------------|
+|                 250 |                      44.79 |
+|                 500 |                     210.47 |
+|                 750 |                     651.75 |
+|                1000 |                    1634.86 |
+|                1500 |                    6243.92 |
+|                2000 |                   19030.79 |
+|                2500 |                   65650.62 |
+|                5000 |                  783976.02 |
+|                7500 |                 2938578.34 |
+|               10000 |                 7650937.71 |
+
+The data in the table below was obtained by running ~perf stat -- ./main -t 4 <size>~
+
+| Matrix Size (N = M) | Four Threads Time (ms) |
+|---------------------+------------------------|
+|                 250 |                  45.25 |
+|                 500 |                 288.81 |
+|                 750 |                 693.95 |
+|                1000 |                1501.06 |
+|                1500 |                5909.44 |
+|                2000 |               14717.05 |
+|                2500 |               60489.73 |
+|                5000 |              834577.79 |
+|                7500 |             3785013.69 |
+|               10000 |            11328742.53 |
+
+The data in the table below was obtained by running ~perf stat -- ./main -s <size>~
+
+| Matrix Size (N = M) | SIMD Time (ms) |
+|---------------------+----------------|
+|                 250 |          17.95 |
+|                 500 |          83.06 |
+|                 750 |         219.08 |
+|                1000 |         603.53 |
+|                1500 |        2792.09 |
+|                2000 |        9195.58 |
+|                2500 |       21631.61 |
+|                5000 |      221087.12 |
+|                7500 |      574845.93 |
+|               10000 |     1747693.19 |
+
+The data in the table below was obtained by running ~perf stat -- ./main -c <size>~
+
+| Matrix Size (N = M) | Cache Optimized Time (ms) |
+|---------------------+---------------------------|
+|                 250 |                     46.31 |
+|                 500 |                    201.06 |
+|                 750 |                    597.67 |
+|                1000 |                   1390.35 |
+|                1500 |                   4632.95 |
+|                2000 |                  10877.43 |
+|                2500 |                  21546.80 |
+|                5000 |                 169742.93 |
+|                7500 |                 428486.67 |
+|               10000 |                1020138.68 |
+
+The data in the table below was obtained by running ~perf stat -- ./main -t 4 -sc <size>~
+
+| Matrix Size (N = M) | All Optimized Time (ms) |
+|---------------------+-------------------------|
+|                 250 |                   29.24 |
+|                 500 |                  130.97 |
+|                 750 |                  280.40 |
+|                1000 |                  519.62 |
+|                1500 |                 2047.99 |
+|                2000 |                 4472.38 |
+|                2500 |                 8784.77 |
+|                5000 |                67391.07 |
+|                7500 |               228874.11 |
+|               10000 |               561483.16 |
+
+** Comparison and Analysis
+
+* Dense/Sparse Matrix Multiplication
+
+The following data was obtained by running tests using different sparcity levels with sparse
+matrix compression.
+
+The data in the table below was obtained by running ~perf stat -- ./main <size>~. This is copied
+from the earlier tests with no optimizations.
+
+| Matrix Size (N = M) | Dense*Dense Time (ms) |
+|---------------------+-----------------------|
+|                 250 |                 44.79 |
+|                 500 |                210.47 |
+|                 750 |                651.75 |
+|                1000 |               1634.86 |
+|                1500 |               6243.92 |
+|                2000 |              19030.79 |
+|                2500 |              65650.62 |
+|                5000 |             783976.02 |
+|                7500 |            2938578.34 |
+|               10000 |            7650937.71 |
+
+The data in the table below was obtained by running ~perf stat -- ./main --sparse -s1 <pct> <size>~.
+
+| Matrix Size (N = M) | Sparcity Percent | Sparse*Dense Time (ms) |
+|---------------------+------------------+------------------------|
+|                1000 |             0.05 |                1031.32 |
+|                1000 |              0.1 |                1044.57 |
+|                1000 |              0.5 |                1012.43 |
+|                1000 |                1 |                1021.70 |
+|                1000 |                2 |                1006.83 |
+|                1000 |                5 |                 987.55 |
+|               10000 |             0.05 |              710552.41 |
+|               10000 |              0.1 |              739914.50 |
+|               10000 |              0.5 |              710524.96 |
+|               10000 |                1 |              714872.32 |
+|               10000 |                2 |              701342.32 |
+|               10000 |                5 |              685007.12 |
+
+The data in the table below was obtained by running ~perf stat -- ./main --sparse -s1 <pct> -s2 <pct> <size>~.
+
+| Matrix Size (N = M) | Sparcity Percent | Sparse*Sparse Time (ms) |
+|---------------------+------------------+-------------------------|
+|                1000 |             0.05 |                 1012.29 |
+|                1000 |              0.1 |                 1030.99 |
+|                1000 |              0.5 |                 1017.11 |
+|                1000 |                1 |                 1000.94 |
+|                1000 |                2 |                  985.83 |
+|                1000 |                5 |                  952.14 |
+|               10000 |             0.05 |               707695.97 |
+|               10000 |              0.1 |               719355.56 |
+|               10000 |              0.5 |               702657.92 |
+|               10000 |                1 |               696497.61 |
+|               10000 |                2 |               687689.21 |
+|               10000 |                5 |               646596.88 |
+
+** Comparison and Analysis

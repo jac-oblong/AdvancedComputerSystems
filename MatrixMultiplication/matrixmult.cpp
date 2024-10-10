@@ -54,7 +54,7 @@ void MatrixMultRegion_SIMD(DenseMatrix &a, DenseMatrix &b, DenseMatrix &c,
                            size_t beg, size_t end) {
   __m128 va, vb, vc;
   for (size_t i = 0; i < a.num_rows(); i++) {
-    for (size_t j = 0; j < b.num_cols(); j += 4) {
+    for (size_t j = 0; j < (b.num_cols() / 4) * 4; j += 4) {
       vc = _mm_setzero_ps();
       for (size_t k = 0; k < a.num_cols(); k++) {
         va = _mm_set1_ps(a.get(i, k));
@@ -62,6 +62,11 @@ void MatrixMultRegion_SIMD(DenseMatrix &a, DenseMatrix &b, DenseMatrix &c,
         vc = _mm_add_ps(vc, _mm_mul_ps(va, vb));
       }
       _mm_storeu_ps(&c.get(i, j), vc);
+    }
+    for (size_t j = 0; j < b.num_cols() % 4; j++) {
+      for (size_t k = 0; k < a.num_cols(); k++) {
+        c.set(i, j, a.get(i, k) * b.get(k, j));
+      }
     }
   }
 }
@@ -197,16 +202,20 @@ DenseMatrix DenseMatrix::operator*(DenseMatrix &other) {
 
   DenseMatrix result = DenseMatrix(this->size);
 
-  std::vector<std::thread> threads;
-  for (size_t i = 0; i < this->num_threads; i++) {
-    size_t beg = (i * this->num_rows()) / this->num_threads;
-    size_t end = ((i + 1) * this->num_rows()) / this->num_threads;
-    threads.emplace_back(func, std::ref(*this), std::ref(other),
-                         std::ref(result), beg, end);
-  }
+  if (this->num_threads > 1) {
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < this->num_threads; i++) {
+      size_t beg = (i * this->num_rows()) / this->num_threads;
+      size_t end = ((i + 1) * this->num_rows()) / this->num_threads;
+      threads.emplace_back(func, std::ref(*this), std::ref(other),
+                           std::ref(result), beg, end);
+    }
 
-  for (std::thread &thread : threads) {
-    thread.join();
+    for (std::thread &thread : threads) {
+      thread.join();
+    }
+  } else {
+    func(std::ref(*this), other, std::ref(result), 0, this->size);
   }
 
   return result;
