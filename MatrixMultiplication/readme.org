@@ -21,31 +21,31 @@ The data in the table below was obtained by running ~perf stat -- ./main <size>~
 
 | Matrix Size (N = M) | No Optimizations Time (ms) |
 |---------------------+----------------------------|
-|                 250 |                      44.79 |
-|                 500 |                     210.47 |
-|                 750 |                     651.75 |
-|                1000 |                    1634.86 |
-|                1500 |                    6243.92 |
-|                2000 |                   19030.79 |
-|                2500 |                   65650.62 |
-|                5000 |                  783976.02 |
-|                7500 |                 2938578.34 |
-|               10000 |                 7650937.71 |
+|                 250 |                      45.25 |
+|                 500 |                     288.81 |
+|                 750 |                     693.95 |
+|                1000 |                    1501.06 |
+|                1500 |                    5909.44 |
+|                2000 |                   14717.05 |
+|                2500 |                   60489.73 |
+|                5000 |                  834577.79 |
+|                7500 |                 3785013.69 |
+|               10000 |                11328742.53 |
 
 The data in the table below was obtained by running ~perf stat -- ./main -t 4 <size>~
 
 | Matrix Size (N = M) | Four Threads Time (ms) |
 |---------------------+------------------------|
-|                 250 |                  45.25 |
-|                 500 |                 288.81 |
-|                 750 |                 693.95 |
-|                1000 |                1501.06 |
-|                1500 |                5909.44 |
-|                2000 |               14717.05 |
-|                2500 |               60489.73 |
-|                5000 |              834577.79 |
-|                7500 |             3785013.69 |
-|               10000 |            11328742.53 |
+|                 250 |                  44.79 |
+|                 500 |                 210.47 |
+|                 750 |                 651.75 |
+|                1000 |                1634.86 |
+|                1500 |                6243.92 |
+|                2000 |               19030.79 |
+|                2500 |               65650.62 |
+|                5000 |              783976.02 |
+|                7500 |             2938578.34 |
+|               10000 |             7650937.71 |
 
 The data in the table below was obtained by running ~perf stat -- ./main -s <size>~
 
@@ -93,6 +93,18 @@ The data in the table below was obtained by running ~perf stat -- ./main -t 4 -s
 |               10000 |               561483.16 |
 
 ** Comparison and Analysis
+
+The graph below shows the execution time for matrix multiplication based on
+different sized matrices and different types of optimizations.
+
+[[file:optimizations.png]]
+
+As can be seen, the results are worst when there are no optimizations and best when all
+optimizations are used. MultiThreading provides some increase in speed, but not a significant
+amount compared to SIMD and cache optimization. Cache optimization has the best performance
+for one type of optimization. This makes sense as it is essentially guaranteed that there will
+be a cache miss for every column access into the second matrix, which will happen N times for
+each element in the resulting matrix.
 
 * Dense/Sparse Matrix Multiplication
 
@@ -150,3 +162,37 @@ The data in the table below was obtained by running ~perf stat -- ./main --spars
 |               10000 |                5 |               646596.88 |
 
 ** Comparison and Analysis
+
+The graph below shows the execution time for dense and sparse matrix multiplication
+where the matrix size is 1000.
+
+[[file:sparse1000.png]]
+
+The graph below shows the execution time for dense and sparse matrix multiplication
+where the matrix size is 10000.
+
+The graph below shows the execution time for dense and sparse matrix multiplication
+where the matrix size is 1000.
+
+The graph below shows the execution time for dense and sparse matrix multiplication
+where the matrix size is 1000.
+
+[[file:sparse10000.png]]
+
+As can be seen in the graphs above, compressing either one or both matrices into
+a sparse matrix will significantly decrease the execution time of the matrix
+multiplication. As such, if it makes sense to almost always enable matrix compression.
+However, there is a slight increase in execution time when the sparcity is around
+0.1%, though the increase is not significant compared to the execution time without
+compression.
+
+Much of the decrease in execution time is caused by the decrease in cache misses due to
+how the compress matrices are represented. If comparing sparse matrix multiplication to
+dense matrix multiplication with cache optimization, the decrease in execution time is
+halved.
+
+It is also important to take into account the increase in data structure size when using
+sparse matrix compression. If the sparcity is not significantly high, compressing the matrix
+will lead to an increase in the amount of memory needed to represent the matrix. If memory
+is also an important factor, and not just execution time, then the minimum sparcity at which
+compression is enabled would increase.
