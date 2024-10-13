@@ -1,8 +1,21 @@
 #+title: Matrix-Matrix Multiplication
 
+NOTE: Because of the amount of time it takes to multiply 10,000 x 10,000 matrices (well over 3
+hours), a size of 5000 x 5000 will be used instead.
+
 In order to measure the effect of different optimizations on matrix multiplication performance,
 multiple different test-benches were created using a combination of multi-threading, cache
 optimizations, simd, and sparse matrix compression.
+
+To run all tests, see below.
+
+#+begin_src bash
+./run.py
+#+end_src
+
+To run a specific test, see below. The ~-t~ option specifies the number of threads. ~-s~ enables SIMD.
+~-c~ enables cache optimizations. ~--sparse~ enables sparse matrix compression. ~-s1~ and ~-s2~ are the
+sparcities for each matrix. ~<size>~ is the size of the square matrix.
 
 #+begin_src bash
 g++ main.cpp matrixmult.cpp -o main -Wall -msse3 -O3
@@ -12,187 +25,99 @@ g++ main.cpp matrixmult.cpp -o main -Wall -msse3 -O3
 perf stat -- ./main <size>
 #+end_src
 
-* Default vs MultiThreading vs SIMD vs Cache vs All
+All data in this document was taken from the generated ~log.txt~ file.
 
-The following data was obtained by running tests using no optimizations, only multithreading,
-only simd, only cache optimizations, and all optimizations.
+* Different Optimization Levels
+** Optimizations for Different Sizes
+[[file:images/Optimizations for 500 Matrix Size.png]]
 
-The data in the table below was obtained by running ~perf stat -- ./main <size>~.
+[[file:images/Optimizations for 1000 Matrix Size.png]]
 
-| Matrix Size (N = M) | No Optimizations Time (ms) |
-|---------------------+----------------------------|
-|                 250 |                      45.25 |
-|                 500 |                     288.81 |
-|                 750 |                     693.95 |
-|                1000 |                    1501.06 |
-|                1500 |                    5909.44 |
-|                2000 |                   14717.05 |
-|                2500 |                   60489.73 |
-|                5000 |                  834577.79 |
-|                7500 |                 3785013.69 |
-|               10000 |                11328742.53 |
+[[file:images/Optimizations for 2500 Matrix Size.png]]
 
-The data in the table below was obtained by running ~perf stat -- ./main -t 4 <size>~
+[[file:images/Optimizations for 5000 Matrix Size.png]]
 
-| Matrix Size (N = M) | Four Threads Time (ms) |
-|---------------------+------------------------|
-|                 250 |                  44.79 |
-|                 500 |                 210.47 |
-|                 750 |                 651.75 |
-|                1000 |                1634.86 |
-|                1500 |                6243.92 |
-|                2000 |               19030.79 |
-|                2500 |               65650.62 |
-|                5000 |              783976.02 |
-|                7500 |             2938578.34 |
-|               10000 |             7650937.71 |
+As can be seen in the graphs above, SIMD and cache optimizations saw the best performance
+improvements. SIMD saw consistent improvement regardless of matrix size, while cache
+optimizations saw increasing improvement as the matrix size grew, eventually passing
+SIMD at 5000 x 5000 matrix size.
 
-The data in the table below was obtained by running ~perf stat -- ./main -s <size>~
+Multi-threading rarely saw a significant improvement, except in the case of multi-threading
+with cache. This may be due to the added overhead of managing the threads, or some performance
+throttling done by the OS because the computer was running on battery.
 
-| Matrix Size (N = M) | SIMD Time (ms) |
-|---------------------+----------------|
-|                 250 |          17.95 |
-|                 500 |          83.06 |
-|                 750 |         219.08 |
-|                1000 |         603.53 |
-|                1500 |        2792.09 |
-|                2000 |        9195.58 |
-|                2500 |       21631.61 |
-|                5000 |      221087.12 |
-|                7500 |      574845.93 |
-|               10000 |     1747693.19 |
+** Optimizations for Different Sparcities
+[[file:images/Optimizations for 5000 Matrix Size With 0% Sparcity.png]]
 
-The data in the table below was obtained by running ~perf stat -- ./main -c <size>~
+[[file:images/Optimizations for 5000 Matrix Size With 1% Sparcity.png]]
 
-| Matrix Size (N = M) | Cache Optimized Time (ms) |
-|---------------------+---------------------------|
-|                 250 |                     46.31 |
-|                 500 |                    201.06 |
-|                 750 |                    597.67 |
-|                1000 |                   1390.35 |
-|                1500 |                   4632.95 |
-|                2000 |                  10877.43 |
-|                2500 |                  21546.80 |
-|                5000 |                 169742.93 |
-|                7500 |                 428486.67 |
-|               10000 |                1020138.68 |
+As can be seen in the graphs above, the performance improvements for each set of
+optimizations stays consistent across different sparcities. This makes sense because no
+sparse matrix compression is being performed in either case.
 
-The data in the table below was obtained by running ~perf stat -- ./main -t 4 -sc <size>~
+* Dense-Dense Matrix Multiplication
+[[file:images/Dense-Dense with 1% Sparcity.png]]
 
-| Matrix Size (N = M) | All Optimized Time (ms) |
-|---------------------+-------------------------|
-|                 250 |                   29.24 |
-|                 500 |                  130.97 |
-|                 750 |                  280.40 |
-|                1000 |                  519.62 |
-|                1500 |                 2047.99 |
-|                2000 |                 4472.38 |
-|                2500 |                 8784.77 |
-|                5000 |                67391.07 |
-|                7500 |               228874.11 |
-|               10000 |               561483.16 |
+As can be seen in the execution time increases by ~8x between sizes. This matches what
+would be expected, as the size doubles and the non-optimized matrix multiplication algorithm
+is O(N^3).
 
-** Comparison and Analysis
+* Sparse-Dense Matrix Multiplication
+** Sparse-Dense for Different Sizes
+[[file:images/Sparse-Dense with Matrix Size 500.png]]
 
-The graph below shows the execution time for matrix multiplication based on
-different sized matrices and different types of optimizations.
+[[file:images/Sparse-Dense with Matrix Size 1000.png]]
 
-[[file:optimizations.png]]
+[[file:images/Sparse-Dense with Matrix Size 2500.png]]
 
-As can be seen, the results are worst when there are no optimizations and best when all
-optimizations are used. MultiThreading provides some increase in speed, but not a significant
-amount compared to SIMD and cache optimization. Cache optimization has the best performance
-for one type of optimization. This makes sense as it is essentially guaranteed that there will
-be a cache miss for every column access into the second matrix, which will happen N times for
-each element in the resulting matrix.
+[[file:images/Sparse-Dense with Matrix Size 5000.png]]
 
-* Dense/Sparse Matrix Multiplication
+As can be seen in the graphs above, as the sparcity increases, the execution time tends
+to decrease. The decrease is not a major amount, but is still significant.
 
-The following data was obtained by running tests using different sparcity levels with sparse
-matrix compression.
+The only outlier to this is the 500 x 500 matrix, which has an increase in execution time
+for the 5% sparcity. This may be caused by the added overhead in generating the sparse-matrix.
 
-The data in the table below was obtained by running ~perf stat -- ./main <size>~. This is copied
-from the earlier tests with no optimizations.
+** Sparse-Dense for Different Sparcities
+[[file:images/Sparse-Dense with 0.1% Sparcity.png]]
 
-| Matrix Size (N = M) | Dense*Dense Time (ms) |
-|---------------------+-----------------------|
-|                 250 |                 44.79 |
-|                 500 |                210.47 |
-|                 750 |                651.75 |
-|                1000 |               1634.86 |
-|                1500 |               6243.92 |
-|                2000 |              19030.79 |
-|                2500 |              65650.62 |
-|                5000 |             783976.02 |
-|                7500 |            2938578.34 |
-|               10000 |            7650937.71 |
+[[file:images/Sparse-Dense with 1% Sparcity.png]]
 
-The data in the table below was obtained by running ~perf stat -- ./main --sparse -s1 <pct> <size>~.
+[[file:images/Sparse-Dense with 5% Sparcity.png]]
 
-| Matrix Size (N = M) | Sparcity Percent | Sparse*Dense Time (ms) |
-|---------------------+------------------+------------------------|
-|                1000 |             0.05 |                1031.32 |
-|                1000 |              0.1 |                1044.57 |
-|                1000 |              0.5 |                1012.43 |
-|                1000 |                1 |                1021.70 |
-|                1000 |                2 |                1006.83 |
-|                1000 |                5 |                 987.55 |
-|               10000 |             0.05 |              710552.41 |
-|               10000 |              0.1 |              739914.50 |
-|               10000 |              0.5 |              710524.96 |
-|               10000 |                1 |              714872.32 |
-|               10000 |                2 |              701342.32 |
-|               10000 |                5 |              685007.12 |
+The trends shown above are pretty consistent with what was seen for Dense-Dense Matrix
+Multiplication. Notably, however, the execution times are lower than what was seen for
+Dense-Dense matrices, as the matrices are being compressed.
 
-The data in the table below was obtained by running ~perf stat -- ./main --sparse -s1 <pct> -s2 <pct> <size>~.
+* Sparse-Sparse Matrix Multiplication
+** Sparse-Sparse for Different Sizes
+[[file:images/Sparse-Sparse with Matrix Size 500.png]]
 
-| Matrix Size (N = M) | Sparcity Percent | Sparse*Sparse Time (ms) |
-|---------------------+------------------+-------------------------|
-|                1000 |             0.05 |                 1012.29 |
-|                1000 |              0.1 |                 1030.99 |
-|                1000 |              0.5 |                 1017.11 |
-|                1000 |                1 |                 1000.94 |
-|                1000 |                2 |                  985.83 |
-|                1000 |                5 |                  952.14 |
-|               10000 |             0.05 |               707695.97 |
-|               10000 |              0.1 |               719355.56 |
-|               10000 |              0.5 |               702657.92 |
-|               10000 |                1 |               696497.61 |
-|               10000 |                2 |               687689.21 |
-|               10000 |                5 |               646596.88 |
+[[file:images/Sparse-Sparse with Matrix Size 1000.png]]
 
-** Comparison and Analysis
+[[file:images/Sparse-Sparse with Matrix Size 2500.png]]
 
-The graph below shows the execution time for dense and sparse matrix multiplication
-where the matrix size is 1000.
+[[file:images/Sparse-Sparse with Matrix Size 5000.png]]
 
-[[file:sparse1000.png]]
+The results in the graphs above show similar trends to the Sparse-Dense results. As the
+sparcity increases, the execution time decreases by a small amount. The execution times
+are slightly lower if not similar to the Sparse-Dense results, however.
 
-The graph below shows the execution time for dense and sparse matrix multiplication
-where the matrix size is 10000.
+Unlike the Sparse-Dense results, there is no increase in execution time for 5% sparcity when
+the matrix size is 500 x 500. This may be because the increase was an outlier in the data.
 
-The graph below shows the execution time for dense and sparse matrix multiplication
-where the matrix size is 1000.
+** Sparse-Sparse for Different Sparcities
+[[file:images/Sparse-Sparse with 0.1% Sparcity.png]]
 
-The graph below shows the execution time for dense and sparse matrix multiplication
-where the matrix size is 1000.
+[[file:images/Sparse-Sparse with 1% Sparcity.png]]
 
-[[file:sparse10000.png]]
+[[file:images/Sparse-Sparse with 5% Sparcity.png]]
 
-As can be seen in the graphs above, compressing either one or both matrices into
-a sparse matrix will significantly decrease the execution time of the matrix
-multiplication. As such, if it makes sense to almost always enable matrix compression.
-However, there is a slight increase in execution time when the sparcity is around
-0.1%, though the increase is not significant compared to the execution time without
-compression.
+The trends shown above are pretty consistent with what was seen for Dense-Dense and
+Sparse-Dense matrix multiplication. Similarly to the Sparse-Dense results, the execution
+time is much lower than what was seen for Dense-Dense matrices. The results are pretty
+consistent with the results of Sparse-Dense multiplication.
 
-Much of the decrease in execution time is caused by the decrease in cache misses due to
-how the compress matrices are represented. If comparing sparse matrix multiplication to
-dense matrix multiplication with cache optimization, the decrease in execution time is
-halved.
-
-It is also important to take into account the increase in data structure size when using
-sparse matrix compression. If the sparcity is not significantly high, compressing the matrix
-will lead to an increase in the amount of memory needed to represent the matrix. If memory
-is also an important factor, and not just execution time, then the minimum sparcity at which
-compression is enabled would increase.
+From this, it can be concluded that if there is any significant amount of sparcity, it will
+most always benefit execution time to compress the matrix. That being said, there will also
+be a price in the space complexity of the matrix data structure.
