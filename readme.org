@@ -4,3 +4,4 @@ ECSE 4320 Fall 2024
 
 ** [[./CachePerformance][Project 1]] Cache Performance
 ** [[file:MatrixMultiplication/][Project 2]] Matrix Multiplication
+** [[file:SSDPerformanceProfiling/][Project 3]] SSD Performance Profiling
