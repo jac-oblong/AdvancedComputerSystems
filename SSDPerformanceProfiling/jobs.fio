@@ -1,0 +1,13 @@
+[job1]
+#filename=           # target partition NOTE: should be changed for your system
+#size=               # target partition size NOTE: also needs to be changed
+
+#iodepth=            # queue depth to target
+#blocksize=          # block size or data access size
+#rwmixread=          # percent of total IOs that are reads
+
+ioengine=libaio     # asynchronous IO operations
+numjobs=1           # only use one thread/process
+direct=1            # avoid kernel caching
+fsync=0             # do not issue fsync after each access, dramatically improves performance
+rw=randrw           # random reads/writes

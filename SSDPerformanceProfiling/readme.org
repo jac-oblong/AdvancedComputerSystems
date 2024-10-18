@@ -1,1 +1,8 @@
 #+title: SSD Performance Profiling
+
+The following command was used to generate all data below. *NOTE:* to change the targeted
+partition, edit the fio job file.
+
+#+begin_src bash
+./run.py
+#+end_src
