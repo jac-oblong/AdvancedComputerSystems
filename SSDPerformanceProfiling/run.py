@@ -7,8 +7,8 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent
 OUTPUT_DIR = SCRIPT_DIR / "output"
 
-IO_DEPTHS = [2**i for i in range(11)]  # 1..1024
-BLOCK_SIZES = [2**i for i in range(8)]  # 1..128
+IO_DEPTHS = [1, 4, 8, 32, 256, 1024]
+BLOCK_SIZES = [2**i for i in range(2, 8)]  # 4..128
 READ_PERCENTAGES = [0, 50, 70, 100]
 
 
