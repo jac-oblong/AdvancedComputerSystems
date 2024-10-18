@@ -14,7 +14,7 @@ READ_PERCENTAGES = [0, 50, 70, 100]
 
 def run(iodepth, block_size, read_percent):
     out_file = OUTPUT_DIR / f"output_qlen{iodepth}_bs{block_size}_rw{read_percent}.json"
-    job_file = OUTPUT_DIR / "jobs.fio"
+    job_file = SCRIPT_DIR / "jobs.fio"
     cmd = [
         "fio",
         "--output-format=json",
@@ -22,8 +22,9 @@ def run(iodepth, block_size, read_percent):
         f"--iodepth={iodepth}",
         f"--blocksize={block_size}k",
         f"--rwmixread={read_percent}",
-        "{job_file}",
+        f"{job_file}",
     ]
+    print(cmd)
     subprocess.run(cmd, encoding="utf-8")
 
 

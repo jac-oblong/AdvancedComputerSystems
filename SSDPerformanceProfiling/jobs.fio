@@ -1,6 +1,6 @@
 [job1]
-#filename=           # target partition NOTE: should be changed for your system
-#size=               # target partition size NOTE: also needs to be changed
+filename=/dev/nvme0n1p4           # target partition NOTE: should be changed for your system
+size=15GiB               # target partition size NOTE: also needs to be changed
 
 #iodepth=            # queue depth to target
 #blocksize=          # block size or data access size
