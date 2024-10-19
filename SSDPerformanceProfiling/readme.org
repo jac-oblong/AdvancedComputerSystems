@@ -2,8 +2,88 @@
 
 The following command was used to generate all data below. It may need to be run as ~sudo~.
 
-*NOTE:* to change the targeted partition, edit the fio job file.
+*NOTE:* to change the targeted partition, edit ~fio.ini~.
 
 #+begin_src bash
-./run.py
+./run.py > log.txt
 #+end_src
+
+* Hard Drive Stats
+
+*Vendor:* Union Memory (Shenzhen)
+*Device:* UMIS RPJTJ512MEE1OWX
+*Total Size:* 512GB
+*Tested Size:* 15GiB partition
+
+* Results and Analysis
+
+[[file:images/all_data.png]]
+
+The table above shows all the data collected from the tests.
+
+[[file:images/Data_Access_Size_vs_Latency_at_50:50_RW_Ratio.png]]
+
+The graph above shows the relationship between data access size and latency. The read/write
+ratio is held constant at 50:50. Additionally, there are three different lines for different
+queue lengths. As can be seen in the graph, as the data access size increases, the latency
+also increases. This makes sense, as reading/writing more data at a single time is going to
+take longer to complete that operation.
+
+[[file:images/Read_Percentage_vs_Latency_at_Queue_Length_of_4.png]]
+
+The graph above shows the relationship between read/write ratio and latency. The queue length
+is held constant at 4. Additionally, there are three different lines for different data access
+sizes. As can be seen in the graph, the lowest latency is when the operations are almost
+entirely reads or entirely writes, with writes taking a longer amount of time because writing
+to an SSD is more resource intensive than just reading.
+
+[[file:images/Queue_Length_vs_Latency_at_50:50_RW_Ratio.png]]
+
+The graph above shows the relationship between queue length and latency. The read/write
+ratio is held constant at 50:50. Additionally, there are three different lines for different
+data access sizes. As can be seen in the graph, as the queue length increases, the latency
+also increases. This is a direct result of the queuing theory. As the queue length increases,
+there resources of the SSD are more fully utilized and the throughput increases, but the
+latency suffers because of it.
+
+[[file:images/Data_Access_Size_vs_Bandwidth_at_50:50_RW_Ratio.png]]
+
+The graph above shows the relationship between data access size and bandwidth. The read/write
+ratio is held constant at 50:50. Additionally, there are three different lines for different
+queue lengths. As can be seen in the graph, as the data access size increases, the bandwidth
+also increases. This is because there is less time spent setting up the IO operation, and so
+the amount of data processed is increased. The relationship is not linear, however, as the
+bandwidth tapers off around the 64KB mark. This is likely due to the hardware reaching its
+bandwidth limit.
+
+[[file:images/Read_Percentage_vs_Bandwidth_at_Queue_Length_of_4.png]]
+
+The graph above shows the relationship between read/write ratio and bandwidth. The queue length
+is held constant at 4. Additionally, there are three different lines for different data access
+sizes. As can be seen in the graph, as the read percentage increases, the bandwidth tends to
+also increase, with the exception of the 16KB access size, which actually decreases. This is
+because reading is less resource intensive, so more data can be processed. Additionally, the
+queue length is non-zero, so there will always be an additional operation for the SSD to
+perform when the current one finishes.
+
+[[file:images/Queue_Length_vs_Bandwidth_at_50:50_RW_Ratio.png]]
+
+The graph above shows the relationship between queue length and bandwidth. The read/write
+ratio is held constant at 50:50. Additionally, there are three different lines for different
+data access sizes. As can be seen in the graph, as the queue length increases, the bandwidth
+initially starts to increase, but it quickly saturates at around 400 MiB/s. The initial
+increase in bandwidth is expected, as increasing the queue length would increase the
+utilization of the hardware, ensuring that there is always work for the SSD. The saturation
+is likely the point where the hardware has been fully utilized by the job load, and so further
+increases to the queue length will not increase performance.
+
+* Conclusion
+
+Through this project, the relationship between bandwidth and latency.
+
+The Intel Data Center NVMe SSD D7-P5600 boasts a IOPS of 130K for random write-only workload
+with 4KB access size. We can assume that the queue length is at least 32, as this is where the
+tested SSD overtakes the Intel one with 390K IOPS. This difference is likely caused by the fact
+that the enterprise grade SSD is doing a multitude of data loss prevention actions for
+reliability, which would cause a decrease in IOPS compared to a consumer grade SSD, which has
+significantly less reliability.
